@@ -92,12 +92,18 @@ fn setup(
             shadows_enabled: false,
             ..default()
         },
-        transform: Transform::from_xyz(2.0, 10.0, 2.0),
+        transform: Transform::from_xyz(-5.0, 10.0, 0.0),
         ..default()
     });
-
-    // ambient_light.color = Color::WHITE;
-    // ambient_light.brightness = 0.95;
+    commands.spawn(PointLightBundle {
+        point_light: PointLight {
+            intensity: 5000.0,
+            shadows_enabled: false,
+            ..default()
+        },
+        transform: Transform::from_xyz(5.0, 10.0, 0.0),
+        ..default()
+    });
 
     // plane for click-detection
     commands
@@ -112,25 +118,33 @@ fn setup(
         ..default()
     });
 
-    let gltf = loading.0[0].clone().typed::<Gltf>();
-    let thing = gltf_assets.get(&gltf).unwrap();
+    let gltf_handle = loading.0[0].clone().typed::<Gltf>();
+    let gltf = gltf_assets.get(&gltf_handle).unwrap();
 
-    // println!("scenes {:?}", thing.named_scenes);
-    // println!("nodes {:?}", thing.named_nodes);
-    // println!("meshes {:?}", thing.named_meshes);
-    // println!("mats {:?}", thing.named_materials);
+    // println!("scenes {:?}", gltf.named_scenes);
+    // println!("nodes {:?}", gltf.named_nodes);
+    // println!("meshes {:?}", gltf.named_meshes);
+    // println!("mats {:?}", gltf.named_materials);
 
     // TODO split the floor and walls so they can have different frictions!
 
-    let mesh = &thing.named_meshes["Level1"];
-    let yes = gltf_meshes.get(mesh).unwrap();
-
-    for m in &yes.primitives {
+    let mesh = &gltf.named_meshes["Floor"];
+    for m in &gltf_meshes.get(mesh).unwrap().primitives {
         let mash = meshes.get(&m.mesh).unwrap();
         commands
             .spawn(RigidBody::Fixed)
             .insert(Restitution::new(0.2))
-            .insert(Friction::new(0.5))
+            .insert(Friction::new(0.2))
+            .insert(Collider::from_bevy_mesh(&mash, &ComputedColliderShape::TriMesh).unwrap());
+    }
+
+    let mesh = &gltf.named_meshes["Wall"];
+    for m in &gltf_meshes.get(mesh).unwrap().primitives {
+        let mash = meshes.get(&m.mesh).unwrap();
+        commands
+            .spawn(RigidBody::Fixed)
+            .insert(Restitution::new(0.5))
+            .insert(Friction::new(0.0))
             .insert(Collider::from_bevy_mesh(&mash, &ComputedColliderShape::TriMesh).unwrap());
     }
 
@@ -146,13 +160,13 @@ fn setup(
             scene: asset_server.load("ball.glb#Scene0"),
             ..default()
         })
-        .insert(Transform::from_xyz(-6.5, 10.0, 0.0))
+        .insert(Transform::from_xyz(-6.5, 5.0, 0.0))
         .insert(RigidBody::Dynamic)
         .insert(Collider::ball(0.375))
         .insert(Restitution::coefficient(0.2))
         .insert(ExternalImpulse::default())
         .insert(Friction::new(0.0))
-        .insert(ColliderMassProperties::Density(2.5))
+        .insert(ColliderMassProperties::Density(3.0))
         .insert(Ccd::enabled())
         .insert(Ball);
 }
@@ -173,13 +187,13 @@ fn restart(
                 scene: asset_server.load("ball.glb#Scene0"),
                 ..default()
             })
-            .insert(Transform::from_xyz(-6.5, 10.0, 0.0))
+            .insert(Transform::from_xyz(-6.5, 5.0, 0.0))
             .insert(RigidBody::Dynamic)
             .insert(Collider::ball(0.375))
             .insert(Restitution::coefficient(0.2))
             .insert(ExternalImpulse::default())
-            .insert(Friction::new(0.01))
-            .insert(ColliderMassProperties::Density(2.0))
+            .insert(Friction::new(0.0))
+            .insert(ColliderMassProperties::Density(3.0))
             .insert(Ccd::enabled())
             .insert(Ball);
     }
@@ -241,7 +255,7 @@ fn click(
 
             let dist = hit_point
                 .distance(trans.translation)
-                .clamp(0.0, 200.0);
+                .clamp(0.0, 10.0);
             let angle = f32::atan2(hit_point.z - trans.translation.z, hit_point.x - trans.translation.x);
             let seg_x = (f32::cos(angle) * dist) / POWER_SEGMENTS;
             let seg_y = (f32::sin(angle) * dist) / POWER_SEGMENTS;

@@ -1,6 +1,23 @@
 <html><head>
         
+        <style>
+            body {
+                background-color: black;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+        </style>
     
-<link rel="preload" href="/mini-golf-3d8af667f972bc3f_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/mini-golf-3d8af667f972bc3f.js"></head>
-<body><script type="module">import init from '/mini-golf-3d8af667f972bc3f.js';init('/mini-golf-3d8af667f972bc3f_bg.wasm');</script></body></html>
+<link rel="preload" href="/mini-golf-15902cbba5b21ad7_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/mini-golf-15902cbba5b21ad7.js"></head>
+    <body>
+        <h1 style="color: white; font-family: monospace;">bevy mini golf poc</h1>
+        <div class="game-container">
+            <canvas id="bevy">
+                Javascript and support for canvas is required
+            </canvas>
+        </div>
+    
+<script type="module">import init from '/mini-golf-15902cbba5b21ad7.js';init('/mini-golf-15902cbba5b21ad7_bg.wasm');</script></body></html>
